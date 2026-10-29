@@ -135,13 +135,14 @@ label.fl{display:block;font-weight:600;margin:18px 0 8px}
 <script>
 /* ======================= CONFIG ======================= */
 const CONFIG = {
-  STUDY_VERSION: "s2-7.0.0",
+  STUDY_VERSION: "s2-7.1.0",
   SUPABASE_URL: "https://zwipeiluipgwqrgbmncc.supabase.co",
   SUPABASE_KEY: "sb_publishable_tOpJrlMKyh4KHuML2CEbbw_Z0Cam54c",   // publishable key: insert-only by RLS
   TABLE: "study2_responses",
   COMPLETION_CODE: "MUS2DONE",     // replace with the code Prolific gives you
   PROLIFIC_RETURN: "https://app.prolific.com/submissions/complete?cc=",
-  MINUTES: 10
+  MINUTES: 10,
+  NEXT_URL: "https://terry.qualtrics.com/jfe/form/SV_0VNusN9UYQhMvjg"   // second survey in the same session (non-Prolific participants); the SONA code is passed on as ?id=
 };
 
 /* ======================= CONTENT ======================= */
@@ -409,7 +410,7 @@ const LIK6 = ["Strongly disagree","Moderately disagree","Slightly disagree","Sli
 
 /* ======================= STATE ======================= */
 const qs = new URLSearchParams(location.search);
-const KEY = "mus2_state_v7";
+const KEY = "mus2_state_v71";
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 let S;
 try{ S = JSON.parse(sessionStorage.getItem(KEY)||"null"); }catch(e){ S=null; }
@@ -656,7 +657,7 @@ function debrief(){
     <p>This study looks at what people do when they are unsure whether their uncertainty comes from missing information or from chance. For example, someone who thinks a problem has a cause that can be found may look for it, while someone who thinks it is down to chance may set up a backup or spread their risk. We also asked how clearly you could tell which of the two it was.</p>
     <p>The situations you read were made up for this study. There were no right or wrong answers.</p>
     <p class="small">Please click below to save your answers.</p>
-    <div class="err" id="err" role="alert"></div><div class="btnrow"><button class="primary" id="b">Submit and finish</button></div></div>`;
+    <div class="err" id="err" role="alert"></div><div class="btnrow"><button class="primary" id="b">Submit and continue</button></div></div>`;
   const b=document.getElementById("b");
   b.onclick=async()=>{ b.disabled=true; b.textContent="Saving…"; const ok = await submit(); if(ok){ next(); } else { b.disabled=false; b.textContent="Try again";
       document.getElementById("err").textContent="We could not save your answers. Please check your connection and try again."; } };
@@ -665,12 +666,18 @@ function debrief(){
 function done(){
   secEl.textContent="Finish"; bar.style.width="100%";
   const pro = S.source==="prolific";
-  // No completion-code page: Prolific participants are sent back to Prolific automatically (the code travels in the link).
-  app.innerHTML = `<div class="card narrow"><h1>You're finished</h1>
-    <p>Your answers have been saved.</p>
-    ${pro?`<p>Taking you back to Prolific…</p><div class="btnrow"><a href="${CONFIG.PROLIFIC_RETURN+CONFIG.COMPLETION_CODE}"><button class="primary">Return to Prolific</button></a></div>`
-         :`<p>You can now close this page.</p>`}</div>`;
-  if(pro && !S.is_test) setTimeout(()=>location.href=CONFIG.PROLIFIC_RETURN+CONFIG.COMPLETION_CODE, 1500);
+  if(pro){   // Prolific: back to Prolific automatically (the code travels in the link)
+    app.innerHTML = `<div class="card narrow"><h1>You're finished</h1><p>Your answers have been saved.</p><p>Taking you back to Prolific…</p>
+      <div class="btnrow"><a href="${CONFIG.PROLIFIC_RETURN+CONFIG.COMPLETION_CODE}"><button class="primary">Return to Prolific</button></a></div></div>`;
+    if(!S.is_test) setTimeout(()=>location.href=CONFIG.PROLIFIC_RETURN+CONFIG.COMPLETION_CODE, 1500);
+    return;
+  }
+  // Everyone else (SONA): continue to the second survey, passing the same participant code
+  const next = CONFIG.NEXT_URL + (S.participant_id ? "?id="+encodeURIComponent(S.participant_id) : "");
+  app.innerHTML = `<div class="card narrow"><h1>Part 1 complete</h1><p>Your answers have been saved.</p>
+    <p>Next, you will continue to the second part of this session. Please complete it to finish the study.</p>
+    <div class="btnrow"><a href="${next}"><button class="primary">Continue to part 2</button></a></div></div>`;
+  if(!S.is_test) setTimeout(()=>location.href=next, 3000);
 }
 
 /* ======================= SAVE ======================= */
