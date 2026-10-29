@@ -135,14 +135,14 @@ label.fl{display:block;font-weight:600;margin:18px 0 8px}
 <script>
 /* ======================= CONFIG ======================= */
 const CONFIG = {
-  STUDY_VERSION: "s2-7.1.0",
+  STUDY_VERSION: "s2-7.2.0",
   SUPABASE_URL: "https://zwipeiluipgwqrgbmncc.supabase.co",
   SUPABASE_KEY: "sb_publishable_tOpJrlMKyh4KHuML2CEbbw_Z0Cam54c",   // publishable key: insert-only by RLS
   TABLE: "study2_responses",
   COMPLETION_CODE: "MUS2DONE",     // replace with the code Prolific gives you
   PROLIFIC_RETURN: "https://app.prolific.com/submissions/complete?cc=",
   MINUTES: 10,
-  NEXT_URL: "https://terry.qualtrics.com/jfe/form/SV_0VNusN9UYQhMvjg"   // second survey in the same session (non-Prolific participants); the SONA code is passed on as ?id=
+  NEXT_URL: "https://terry.qualtrics.com/jfe/form/SV_6yrIkYOuOkzPG5M"   // second survey in the same session (non-Prolific participants); the SONA code is passed on as ?id=
 };
 
 /* ======================= CONTENT ======================= */
@@ -410,7 +410,7 @@ const LIK6 = ["Strongly disagree","Moderately disagree","Slightly disagree","Sli
 
 /* ======================= STATE ======================= */
 const qs = new URLSearchParams(location.search);
-const KEY = "mus2_state_v71";
+const KEY = "mus2_state_v72";
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 let S;
 try{ S = JSON.parse(sessionStorage.getItem(KEY)||"null"); }catch(e){ S=null; }
